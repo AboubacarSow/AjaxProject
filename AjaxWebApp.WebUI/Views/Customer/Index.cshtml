@@ -5,50 +5,147 @@
 
 <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+ 
 
 <h1>Ajax  Müşteri İşlemleri</h1>
 
-<button class="btn btn-primary" id="btn1">Müşteri Listesi</button>
+<button class="btn btn-primary" id="btn1" onclick="list()">Müşteri Listesi</button>
 <button class="btn btn-info" id="btn2">Müşteri Ekle</button>
 <button class="btn btn-danger" id="btn3">Müşteri Sil</button>
 <button class="btn btn-success" id="btn4">Müşteri Güncelle</button>
 <button class="btn btn-warning" id="btn5">Müşteri Getir</button>
-
+<br />
+<br />
 <div class="alert alert-primary">Müşteri Listesi</div>
 <div id="customerList">
-
-
 </div>
+    <hr/>
+    <div >
+        <label class="form-label">Müşteri Adı</label>
+        <input type="text" class="form-control" id="customerName" />
+        <br/>
+        <label class="form-label">Müşteri Soyadı</label>
+        <input type="text" class="form-control" id="customerSurname" />
+    </div>
+
+    <hr />
+    <div>
+        <input type="number" id="deleteId" placeholder="Silinecek Id giriniz" class="form-control"/>
+    </div>
+
+    <hr />
+    <div>
+        <input type="number" id="Id" class="form-control" placeholder="Güncellenecek Müşteri Id" />
+        <br/>
+        <input type="text" id="name" class="form-control" placeholder="Güncellenecek Müşteri Adı" />
+        <br/>
+        <input type="text" id="surname" class="form-control" placeholder="Güncellenecek Müşteri Soyadı" />
+        <br/>
+
+    </div>
+    <br />
+    <br/>
+    <div >
+        <input type="number" class="form-control" id="Id" placeholder="Getirelecek Müşteri Id" />
+    </div>
+
 <script>
-    $("#btn1").click(function (){
-        $.ajax({
-            contentType:"application/json",
-            dataType:"json",
-            type:"Get",
-            url:"/Customer/CustomerList/",
-            success:function(funk1){
-                let customers=jQuery.parseJSON(funk1);
-                console.log(customers);
 
-                let tableHtml="<table class=table table-bordered>"
-                + "<tr>"
-                +"<th>Müşteri Id</th>"
-                +"<th>Müşteri Adı</th>"
-                +"<th>Müşteri Soyadı</th>"
-                +"</tr>"
-                $.each(customers,(index,value)=>{
-                    tableHtml+= `<tr>`
-                    + `<td>${value.CustomerId} </td>`
-                    + `<td>${value.CustomerName} </td>`
-                    + `<td>${value.CustomerSurname} </td>`
-                    + `</tr>`
-                });
-                tableHtml+= "</table>";
-                $("#customerList").html(tableHtml);
+       const list=function (){
+            $.ajax({
+                contentType:"application/json",
+                dataType:"json",
+                type:"GET",
+                url:"/Customer/CustomerList/",
+                success:function(funk1){
+                    let customers=jQuery.parseJSON(funk1);
+                    console.log(customers);
 
-            }
+                    let tableHtml= `<table class=table table-bordered>`
+                    + `<tr>`
+                    +`<th>Müşteri Id</th>`
+                    +`<th>Müşteri Adı</th>`
+                    +`<th>Müşteri Soyadı</th>`
+                    +`</tr>`
+                    $.each(customers,(index,value)=>{
+                        tableHtml+= `<tr>`
+                        + `<td>${value.CustomerId} </td>`
+                        + `<td>${value.CustomerName} </td>`
+                        + `<td>${value.CustomerSurname} </td>`
+                        + `</tr>`
+                    });
+                    tableHtml+=`</table>`;
+                    $("#customerList").html(tableHtml);
+
+                }
+            });
+        };
+        $("#btn2").click(function() {
+            let values={
+                CustomerName:$("#customerName").val(),
+                CustomerSurname:$("#customerSurname").val()
+            };
+    
+            $.ajax({
+                url:"/Customer/CreateOneCustumer/",
+                type:"POST",
+                data:values,
+                success:function (funk2){
+                     let result=jQuery.parseJSON(funk2);
+                     console.log(result);
+                    swal("Güncelleme İşlemi Başarılı!", "Müşteri Güncellendi", "success");
+                    $("#customerName").val()="";
+                    $("#customerSurname").val()="";
+                    list();
+
+                }
+            });
         });
-    });
-
+        $("#btn3").click( function() {
+            let id=$("#deleteId").val();
+            $.ajax({
+                url:"/Customer/DeleteCustomer/" + id,
+                success:function(){
+                    swal("Silme İşlemi Başarılı!", "Müşteri Silindi", "success");
+                    $("#deleteId").val()="";
+                    list();
+                }
+            });
+        });
+        $("#btn4").click(function() {
+            let values={
+                CustomerName:$("#name").val(),
+                CustomerSurname:$("#surname").val(),
+                CustomerId:$("#Id").val()
+            };
+            $.ajax({
+                url:"/Customer/UpdateCustomer/",
+                type:"POST",
+                data:values,
+                success:function (){
+                    swal("Güncelleme İşlemi Başarılı!", "Müşteri Güncellendi", "success");
+                    $("#name").val()="";
+                    $("#surname").val()="";
+                    $("#Id").val()="";
+                    list();
+                }
+            });
+        });
+        $("#btn5").click(function (){
+            let id=$("#Id").val();
+            $.ajax({
+                contentType:"application/json",
+                dataType:"json",
+                type:"GET",
+                url:"/Customer/GetCustomer/" + id,
+                success: function(value){
+                    let result=jQuery.parseJSON(value);
+                    console.log(result);
+                }
+            });
+        });
 </script>
+
 
